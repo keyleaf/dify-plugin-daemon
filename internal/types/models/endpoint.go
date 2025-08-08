@@ -19,3 +19,7 @@ type Endpoint struct {
 	Settings    map[string]any                               `json:"settings" gorm:"column:settings;serializer:json"`
 	Declaration *plugin_entities.EndpointProviderDeclaration `json:"declaration" gorm:"-"` // not stored in db
 }
+
+func (Endpoint) TableName() string {
+	return "ENDPOINTS"
+}

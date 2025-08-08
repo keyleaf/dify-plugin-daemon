@@ -28,3 +28,7 @@ type InstallTask struct {
 	CompletedPlugins int                       `json:"completed_plugins" gorm:"not null"`
 	Plugins          []InstallTaskPluginStatus `json:"plugins" gorm:"serializer:json"`
 }
+
+func (InstallTask) TableName() string {
+	return "INSTALL_TASKS"
+}

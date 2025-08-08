@@ -6,3 +6,7 @@ type TenantStorage struct {
 	PluginID string `gorm:"column:plugin_id;type:varchar(255);not null;index"`
 	Size     int64  `gorm:"column:size;type:bigint;not null"`
 }
+
+func (TenantStorage) TableName() string {
+	return "TENANT_STORAGES"
+}

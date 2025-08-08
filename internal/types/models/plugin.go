@@ -17,6 +17,10 @@ type Plugin struct {
 	RemoteDeclaration plugin_entities.PluginDeclaration  `json:"remote_declaration" gorm:"serializer:json;type:text;size:65535"` // enabled when plugin is remote
 }
 
+func (Plugin) TableName() string {
+	return "PLUGINS"
+}
+
 type ServerlessRuntimeType string
 
 const (
@@ -32,9 +36,17 @@ type ServerlessRuntime struct {
 	Checksum               string                `json:"checksum" gorm:"size:127;index"`
 }
 
+func (ServerlessRuntime) TableName() string {
+	return "SERVERLESS_RUNTIMES"
+}
+
 type PluginDeclaration struct {
 	Model
 	PluginUniqueIdentifier string                            `json:"plugin_unique_identifier" gorm:"size:255;unique"`
 	PluginID               string                            `json:"plugin_id" gorm:"size:255;index"`
 	Declaration            plugin_entities.PluginDeclaration `json:"declaration" gorm:"serializer:json;type:text;size:65535"`
+}
+
+func (PluginDeclaration) TableName() string {
+	return "PLUGIN_DECLARATIONS"
 }

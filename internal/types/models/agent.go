@@ -7,3 +7,7 @@ type AgentStrategyInstallation struct {
 	PluginUniqueIdentifier string `json:"plugin_unique_identifier" gorm:"index;size:255"`
 	PluginID               string `json:"plugin_id" gorm:"index;size:255"`
 }
+
+func (AgentStrategyInstallation) TableName() string {
+	return "AGENT_STRATEGY_INSTALLATIONS"
+}

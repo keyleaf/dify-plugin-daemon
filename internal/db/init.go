@@ -4,21 +4,25 @@ import (
 	"fmt"
 	"time"
 
+	"dm"
+
 	"github.com/langgenius/dify-plugin-daemon/internal/types/app"
 	"github.com/langgenius/dify-plugin-daemon/internal/types/models"
 	"github.com/langgenius/dify-plugin-daemon/internal/utils/log"
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 func initDifyPluginDB(host string, port int, db_name string, default_db_name string, user string, pass string, sslmode string) error {
 	// first try to connect to target database
-	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s", host, port, user, pass, db_name, sslmode)
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	//dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s", host, port, user, pass, db_name, sslmode)
+	// dm://SYSDBA:*****@localhost:5236
+	dsn := fmt.Sprintf("dm://%s:%s@%s:%d?schema=%s", user, pass, host, port, db_name)
+	log.Info("connecting to dify plugin db: %s", dsn)
+	db, err := gorm.Open(dm.Open(dsn), &gorm.Config{})
 	if err != nil {
 		// if connection fails, try to create database
 		dsn = fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s", host, port, user, pass, default_db_name, sslmode)
-		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+		db, err = gorm.Open(dm.Open(dsn), &gorm.Config{})
 		if err != nil {
 			return err
 		}
@@ -30,7 +34,7 @@ func initDifyPluginDB(host string, port int, db_name string, default_db_name str
 		defer pgsqlDB.Close()
 
 		// check if the db exists
-		rows, err := pgsqlDB.Query(fmt.Sprintf("SELECT 1 FROM pg_database WHERE datname = '%s'", db_name))
+		rows, err := pgsqlDB.Query(fmt.Sprintf("SELECT 1 FROM all_objects WHERE object_type = 'SCH' AND object_name = '%s'", db_name))
 		if err != nil {
 			return err
 		}
@@ -45,7 +49,7 @@ func initDifyPluginDB(host string, port int, db_name string, default_db_name str
 
 		// connect to the new db
 		dsn = fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s", host, port, user, pass, db_name, sslmode)
-		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+		db, err = gorm.Open(dm.Open(dsn), &gorm.Config{})
 		if err != nil {
 			return err
 		}
@@ -56,19 +60,19 @@ func initDifyPluginDB(host string, port int, db_name string, default_db_name str
 		return err
 	}
 
-	// check if uuid-ossp extension exists
-	rows, err := pgsqlDB.Query("SELECT 1 FROM pg_extension WHERE extname = 'uuid-ossp'")
-	if err != nil {
-		return err
-	}
-
-	if !rows.Next() {
-		// create the uuid-ossp extension
-		_, err = pgsqlDB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"")
-		if err != nil {
-			return err
-		}
-	}
+	//// check if uuid-ossp extension exists
+	//rows, err := pgsqlDB.Query("SELECT 1 FROM pg_extension WHERE extname = 'uuid-ossp'")
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//if !rows.Next() {
+	//	// create the uuid-ossp extension
+	//	_, err = pgsqlDB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"")
+	//	if err != nil {
+	//		return err
+	//	}
+	//}
 
 	pgsqlDB.SetConnMaxIdleTime(time.Minute * 1)
 	DifyPluginDB = db
@@ -144,10 +148,10 @@ func Init(config *app.Config) {
 		log.Panic("failed to init dify plugin db: %v", err)
 	}
 
-	err = autoMigrate()
-	if err != nil {
-		log.Panic("failed to auto migrate: %v", err)
-	}
+	//err = autoMigrate()
+	//if err != nil {
+	//	log.Panic("failed to auto migrate: %v", err)
+	//}
 
 	log.Info("dify plugin db initialized")
 }

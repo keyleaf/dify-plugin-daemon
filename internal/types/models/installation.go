@@ -13,3 +13,7 @@ type PluginInstallation struct {
 	Source                 string         `json:"source" gorm:"column:source;size:63"`
 	Meta                   map[string]any `json:"meta" gorm:"column:meta;serializer:json"`
 }
+
+func (PluginInstallation) TableName() string {
+	return "PLUGIN_INSTALLATIONS"
+}

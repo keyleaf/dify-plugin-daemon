@@ -59,10 +59,10 @@ services:
       - FORCE_VERIFYING_SIGNATURE=true
     stdin_open: true
     tty: true
-    # 使用host网络模式以便访问宿主机服务
-    network_mode: host
-    # 或者使用bridge模式，但需要修改host.docker.internal为实际IP
-    # network_mode: bridge
+    # 使用bridge网络模式（推荐用于开发环境）
+    network_mode: bridge
+    # 或者使用host网络模式以便访问宿主机服务
+    # network_mode: host
 
 volumes:
   go-mod-cache:

@@ -59,6 +59,7 @@ func (app *App) server(config *app.Config) func() {
 	}
 
 	go func() {
+		log.Info("HTTP server starting on port %d", config.ServerPort)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Panic("listen: %s\n", err)
 		}

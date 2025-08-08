@@ -11,4 +11,5 @@ echo "  - go mod download         # Download dependencies"
 echo "  - go mod tidy             # Tidy dependencies"
 echo ""
 echo "Starting bash shell..."
-exec bash
+#exec bash
+exec go run ./cmd/server

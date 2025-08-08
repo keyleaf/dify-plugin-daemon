@@ -1,31 +1,4 @@
-FROM golang:1.22-alpine as builder
-
-ARG VERSION=unknown
-
-# copy project
-#COPY . /app
-
-# set working directory
-WORKDIR /app
-
-# using goproxy if you have network issues
-ENV GOPROXY=https://goproxy.cn,direct
-
-# build
-#RUN go build \
-#    -ldflags "\
-#    -X 'github.com/langgenius/dify-plugin-daemon/internal/manifest.VersionX=${VERSION}' \
-#    -X 'github.com/langgenius/dify-plugin-daemon/internal/manifest.BuildTimeX=$(date -u +%Y-%m-%dT%H:%M:%S%z)'" \
-#    -o /app/main cmd/server/main.go
-
-# copy entrypoint.sh
-#COPY dev-entrypoint.sh /app/dev-entrypoint.sh
-#RUN chmod +x /app/dev-entrypoint.sh
-
 FROM ubuntu:24.04
-
-#COPY --from=builder /app/main /app/main
-#COPY --from=builder /app/dev-entrypoint.sh /app/dev-entrypoint.sh
 
 WORKDIR /app
 
@@ -38,13 +11,22 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list.d/u
 
 
 ## Install python3.12 if PLATFORM is local
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y curl python3.12 python3.12-venv python3.12-dev python3-pip ffmpeg build-essential \
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y curl python3.12 python3.12-venv python3.12-dev python3-pip ffmpeg build-essential telnet \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1;
 
-# 安装基本的 shell 工具
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y bash curl && apt-get clean && rm -rf /var/lib/apt/lists/*
+# 安装 Go 1.22
+COPY ./docs/go1.22.0.linux-amd64.tar.gz ./
+RUN rm -rf /usr/local/go \
+    && tar -C /usr/local -xzf go1.22.0.linux-amd64.tar.gz \
+    && rm go1.22.0.linux-amd64.tar.gz
+
+# 设置 Go 环境变量
+ENV GOPROXY=https://goproxy.cn,direct
+ENV PATH=$PATH:/usr/local/go/bin
+ENV GOPATH=/go
+ENV GOBIN=$GOPATH/bin
 
 # preload tiktoken
 ENV TIKTOKEN_CACHE_DIR=/app/.tiktoken
